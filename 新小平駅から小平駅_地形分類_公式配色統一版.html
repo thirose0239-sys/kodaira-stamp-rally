@@ -1,0 +1,115 @@
+<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>新小平駅〜小平駅 スタンプラリー・地形分類重ね合わせ図</title><link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"><style>html,body,#map{height:100%;margin:0;font-family:system-ui,sans-serif}#panel{position:absolute;top:12px;right:12px;z-index:1000;background:#fff;box-shadow:0 2px 12px #0003;border-radius:10px;max-width:min(320px,calc(100vw - 65px));padding:12px;font-size:13px}#panel summary{cursor:pointer;font-weight:700;font-size:15px}#panel label{display:block;margin:12px 0}#panel input[type=range]{width:100%}#panel p{line-height:1.5;color:#555}#status{font-size:11px;color:#555}.leaflet-popup-content{font-size:14px} .dot{background:#fff;border:3px solid #1873cc;border-radius:50%;width:12px;height:12px;box-shadow:0 1px 4px #555} @media(max-width:600px){#panel{top:8px;right:8px;padding:10px}}#legend{border-top:1px solid #ddd;padding-top:9px;margin-top:12px}#legend summary{font-size:13px!important} .legend-item{display:flex;align-items:center;gap:9px;margin:9px 0}.legend-line{width:24px;border-top:7px solid #003b9e}.legend-dot{width:13px;height:13px;border:3px solid #1873cc;border-radius:50%;background:white}.legend-area{width:21px;height:15px;background:#b6c6e8;border:1px solid #777}.legend-location{width:13px;height:13px;border-radius:50%;background:#e53935;border:3px solid white;box-shadow:0 0 0 1px #e53935}#gpsControl{position:absolute;bottom:24px;left:12px;z-index:1000;display:flex;flex-direction:column;align-items:flex-start;gap:4px;max-width:calc(100vw - 30px)}#gpsButton{border:0;border-radius:8px;padding:12px 14px;background:#fff;color:#1256a5;font-size:14px;font-weight:700;box-shadow:0 2px 9px #0004;cursor:pointer}#gpsButton.active{background:#1767bb;color:#fff}#gpsStatus{font-size:12px;background:#fff;border-radius:5px;padding:3px 7px;display:none;max-width:280px}.gps-pin{width:14px;height:14px;background:#e53935;border:3px solid white;border-radius:50%;box-shadow:0 0 0 2px #c62828,0 1px 7px #333}.place-label.leaflet-tooltip{font:600 11px/1.25 system-ui,sans-serif;color:#17324b;background:rgba(255,255,255,.92);border:1px solid #7b9bb5;border-radius:4px;padding:2px 4px;box-shadow:0 1px 3px #0002;white-space:nowrap;pointer-events:none}.place-label.leaflet-tooltip:before{display:none}@media(max-width:600px){.place-label.leaflet-tooltip{font-size:10px;padding:2px 3px}} @media(max-width:600px){#gpsControl{bottom:18px;left:8px}#gpsButton{font-size:13px;padding:11px}} </style></head><body><div id="map"></div><details id="panel"><summary>地形分類・表示設定</summary><label><input type="checkbox" id="natural" checked> 自然地形を表示</label><label><input type="checkbox" id="artificial" checked> 人工地形を表示</label><label>地形分類の透明度 <span id="alphaLabel">55%</span><input type="range" id="alpha" min="10" max="90" value="55"></label><label><input type="checkbox" id="route" checked> スタンプラリーの地点・ルート</label><details id="legend"><summary>凡例を開く・閉じる</summary><div class="legend-item"><span class="legend-line"></span>スタンプラリーのルート</div><div class="legend-item"><span class="legend-dot"></span>スタンプラリーの地点（名称表示）</div><div class="legend-item"><span class="legend-area"></span>地形分類（国土地理院公式配色）</div><div class="legend-item"><span class="legend-location"></span>現在地（GPS・赤色）</div><p>地形分類の色は国土地理院の公式スタイルに準拠しています。着色部分をタップすると属性情報を確認できます。</p></details><p id="status">地形分類データを読み込みます。インターネット接続が必要です。</p><p>出典：国土地理院「地理院タイル」「地形分類（ベクトルタイル提供実験）」</p></details><div id="gpsControl"><button id="gpsButton" type="button">◎ 現在地を表示・追尾</button><span id="gpsStatus" role="status"></span></div><script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script><script>const routeData={"type": "FeatureCollection", "features": [{"type": "Feature", "properties": {"name": "新小平駅", "style": "#icon-1603-01579B-labelson-nodesc"}, "geometry": {"type": "Point", "coordinates": [139.4705899, 35.7309094]}}, {"type": "Feature", "properties": {"name": "小川用水 つたかべの径", "style": "#icon-1535-0288D1-labelson-nodesc"}, "geometry": {"type": "Point", "coordinates": [139.4706945, 35.7307384]}}, {"type": "Feature", "properties": {"name": "青木農園（新小平）", "style": "#icon-1899-E65100-labelson-nodesc"}, "geometry": {"type": "Point", "coordinates": [139.4703706, 35.7315744]}}, {"type": "Feature", "properties": {"name": "ウエルサイドオノダ", "style": "#icon-1899-E65100-labelson-nodesc"}, "geometry": {"type": "Point", "coordinates": [139.4713834, 35.7306651]}}, {"type": "Feature", "properties": {"name": "石井園", "style": "#icon-1899-E65100-labelson-nodesc"}, "geometry": {"type": "Point", "coordinates": [139.4761948, 35.7313431]}}, {"type": "Feature", "properties": {"name": "青木農園", "style": "#icon-1899-E65100-labelson-nodesc"}, "geometry": {"type": "Point", "coordinates": [139.476345, 35.7322524]}}, {"type": "Feature", "properties": {"name": "ＪＡ東京むさし 小平ファーマーズ·マーケット ムーちゃん広場", "style": "#icon-1899-E65100-labelson-nodesc"}, "geometry": {"type": "Point", "coordinates": [139.477488, 35.7307431]}}, {"type": "Feature", "properties": {"name": "新井農園", "style": "#icon-1899-E65100-labelson-nodesc"}, "geometry": {"type": "Point", "coordinates": [139.4775787, 35.7298291]}}, {"type": "Feature", "properties": {"name": "阿部園", "style": "#icon-1899-E65100-labelson-nodesc"}, "geometry": {"type": "Point", "coordinates": [139.4786816, 35.7304562]}}, {"type": "Feature", "properties": {"name": "たから道（仲町西側）", "style": "#icon-1535-0288D1-labelson-nodesc"}, "geometry": {"type": "Point", "coordinates": [139.4803392, 35.7299083]}}, {"type": "Feature", "properties": {"name": "たから道（仲町中央）", "style": "#icon-1535-0288D1-labelson-nodesc"}, "geometry": {"type": "Point", "coordinates": [139.4827168, 35.7300651]}}, {"type": "Feature", "properties": {"name": "大澤農園", "style": "#icon-1899-E65100-labelson-nodesc"}, "geometry": {"type": "Point", "coordinates": [139.4805216, 35.730685]}}, {"type": "Feature", "properties": {"name": "たから道（仲町東側）", "style": "#icon-1535-0288D1-labelson-nodesc"}, "geometry": {"type": "Point", "coordinates": [139.4852022, 35.7298494]}}, {"type": "Feature", "properties": {"name": "小川用水 ハッピーとんぼ池", "style": "#icon-1535-0288D1-labelson-nodesc"}, "geometry": {"type": "Point", "coordinates": [139.4850204, 35.7302447]}}, {"type": "Feature", "properties": {"name": "アトリエ絵・果・木", "style": "#icon-1899-E65100-labelson-nodesc"}, "geometry": {"type": "Point", "coordinates": [139.4870135, 35.7296468]}}, {"type": "Feature", "properties": {"name": "岸野農園", "style": "#icon-1899-E65100-labelson-nodesc"}, "geometry": {"type": "Point", "coordinates": [139.4920285, 35.7313551]}}, {"type": "Feature", "properties": {"name": "天神しいたけ", "style": "#icon-1899-E65100-labelson-nodesc"}, "geometry": {"type": "Point", "coordinates": [139.4965458, 35.7326726]}}, {"type": "Feature", "properties": {"name": "吉野農園", "style": "#icon-1886-FFD600-labelson"}, "geometry": {"type": "Point", "coordinates": [139.4958636, 35.7320238]}}, {"type": "Feature", "properties": {"name": "大沼田用水", "style": "#icon-1535-0288D1-labelson-nodesc"}, "geometry": {"type": "Point", "coordinates": [139.4985696, 35.7321807]}}, {"type": "Feature", "properties": {"name": "小川用水 あじさいの小径", "style": "#icon-1535-0288D1-labelson-nodesc"}, "geometry": {"type": "Point", "coordinates": [139.4910769, 35.734353]}}, {"type": "Feature", "properties": {"name": "小川用水(大沼田用水)あじさい公園前", "style": "#icon-1535-0288D1-labelson-nodesc"}, "geometry": {"type": "Point", "coordinates": [139.4910217, 35.7351104]}}, {"type": "Feature", "properties": {"name": "小平駅南口", "style": "#icon-1603-0288D1-labelson-nodesc"}, "geometry": {"type": "Point", "coordinates": [139.4880227, 35.7368573]}}, {"type": "Feature", "properties": {"name": "中島農園（天神町）", "style": "#icon-1899-E65100-labelson-nodesc"}, "geometry": {"type": "Point", "coordinates": [139.4999193, 35.7306079]}}, {"type": "Feature", "properties": {"name": "梅室園 野菜・切花直売所", "style": "#icon-1899-E65100-labelson-nodesc"}, "geometry": {"type": "Point", "coordinates": [139.50506, 35.7303618]}}, {"type": "Feature", "properties": {"name": "ライン １", "style": "#line-F9A825-8556"}, "geometry": {"type": "LineString", "coordinates": [[139.4703706, 35.7315744], [139.47024, 35.7306347], [139.4705919, 35.730572], [139.4706949, 35.7308158], [139.4710554, 35.7308019], [139.471021, 35.7303072], [139.471536, 35.7303142], [139.4713987, 35.7307392], [139.4715446, 35.7303072], [139.4762052, 35.7305093], [139.4761948, 35.7313431], [139.4762052, 35.7305162], [139.4775184, 35.7305789], [139.4774841, 35.7308228]]}}, {"type": "Feature", "properties": {"name": "ライン ２", "style": "#line-F9A825-7394-nodesc"}, "geometry": {"type": "LineString", "coordinates": [[139.4775184, 35.7305789], [139.4776217, 35.7299282], [139.4775184, 35.7305789], [139.4786602, 35.7305344], [139.4805216, 35.730685], [139.4802309, 35.7306598], [139.4802738, 35.7298794], [139.4827168, 35.7300651], [139.4827629, 35.7298585], [139.4846083, 35.7299143], [139.4845997, 35.7298376], [139.4852022, 35.7298494], [139.4851919, 35.7302905], [139.4850204, 35.7302447], [139.4851662, 35.7303114], [139.4851404, 35.7307155], [139.4869429, 35.7307155], [139.4870287, 35.729754], [139.4869343, 35.7307086], [139.4920562, 35.7307782], [139.4920391, 35.7314889], [139.4920477, 35.7307713], [139.4956633, 35.7307782], [139.4958636, 35.7320238], [139.4962984, 35.7327988], [139.4965731, 35.7327848], [139.4962555, 35.7328057]]}}, {"type": "Feature", "properties": {"name": "農業体験ﾌｧｰﾑ 吉野農園(畑のおじさん)", "style": "#icon-1899-E65100-labelson-nodesc"}, "geometry": {"type": "Point", "coordinates": [139.496287, 35.732661]}}, {"type": "Feature", "properties": {"name": "ライン ３", "style": "#line-F9A825-9913-nodesc"}, "geometry": {"type": "LineString", "coordinates": [[139.4962984, 35.7327988], [139.4930647, 35.7341562], [139.4911013, 35.7343513], [139.4910112, 35.7349156], [139.4910217, 35.7351104], [139.4909618, 35.7350881], [139.4901684, 35.735406], [139.4904774, 35.7353154], [139.4878274, 35.736458], [139.4880227, 35.7368573]]}}]};const map=L.map('map',{preferCanvas:true}).setView([35.73,139.49],14);L.tileLayer('https://cyberjapandata.gsi.go.jp/xyz/pale/{z}/{x}/{y}.png',{maxZoom:18,attribution:'地理院タイル © 国土地理院'}).addTo(map);const routeLayer=L.geoJSON(routeData,{style:f=>({color:'#003b9e',weight:8,opacity:1}),pointToLayer:(f,ll)=>L.marker(ll,{icon:L.divIcon({className:'dot',iconSize:[18,18],iconAnchor:[9,9]})}),onEachFeature:(f,l)=>{l.bindPopup(f.properties.name||'地点');if(f.geometry.type==='Point'){l.bindTooltip(escapeHTML(f.properties.name||'地点'),{permanent:true,direction:'right',offset:[11,0],className:'place-label',opacity:.96})}}}).addTo(map);if(routeLayer.getBounds().isValid())map.fitBounds(routeLayer.getBounds().pad(.16));// 縮尺が小さい場合はラベルの重なりを抑える（地図移動時に再判定）
+function updatePlaceLabels(){
+ const occupied=[],size=map.getSize();
+ const markers=[];
+ routeLayer.eachLayer(layer=>{if(layer instanceof L.Marker&&layer.getTooltip())markers.push(layer)});
+ // ラベルが重なる場合は方角を変え、配置できないものだけ省略する。
+ // 高倍率でも重なり判定を必ず実行する。
+ markers.sort((a,b)=>{
+  const priority=n=>/農業体験|天神しいたけ/.test(n)?-1:0;
+  return priority(a.feature?.properties?.name||'')-priority(b.feature?.properties?.name||'');
+ });
+ for(const layer of markers){
+  const name=layer.feature?.properties?.name||'',point=map.latLngToContainerPoint(layer.getLatLng());
+  const width=Math.min(260,Math.max(48,[...name].reduce((v,c)=>v+(c.charCodeAt(0)>255?11:7),0)+12)),height=20;
+  const choices=[
+   {direction:'right',offset:[11,0],x:point.x+20,y:point.y-10},
+   {direction:'left',offset:[-11,0],x:point.x-20-width,y:point.y-10},
+   {direction:'top',offset:[0,-11],x:point.x-width/2,y:point.y-32},
+   {direction:'bottom',offset:[0,11],x:point.x-width/2,y:point.y+13}
+  ];
+  let choice=null;
+  for(const c of choices){
+   if(c.x<2||c.y<2||c.x+width>size.x-2||c.y+height>size.y-2)continue;
+   if(occupied.some(b=>c.x<b.x+b.w+5&&c.x+width+5>b.x&&c.y<b.y+b.h+4&&c.y+height+4>b.y))continue;
+   choice=c;break;
+  }
+  if(choice){
+   occupied.push({x:choice.x,y:choice.y,w:width,h:height});
+   const tip=layer.getTooltip();
+   if(tip.options.direction!==choice.direction){tip.options.direction=choice.direction;tip.options.offset=L.point(choice.offset);if(layer.isTooltipOpen())layer.closeTooltip()}
+   if(!layer.isTooltipOpen())layer.openTooltip();
+   else tip.update();
+  }else if(layer.isTooltipOpen())layer.closeTooltip();
+ }
+}
+map.on('zoomend moveend',updatePlaceLabels);updatePlaceLabels();const layers={natural:L.layerGroup().addTo(map),artificial:L.layerGroup()};
+map.createPane('terrainOfficial');map.getPane('terrainOfficial').style.zIndex=420;
+const terrainSources={natural:'experimental_landformclassification1',artificial:'experimental_landformclassification2'};
+const styleCache={},tileCache=new Map();let requestId=0,timer;
+function officialStyle(type){
+ if(!styleCache[type])styleCache[type]=fetch('https://cyberjapandata.gsi.go.jp/xyz/'+terrainSources[type]+'/style.js')
+ .then(r=>{if(!r.ok)throw Error('style HTTP '+r.status);return r.text()})
+ .then(t=>Function('return ('+t.trim().replace(/;\s*$/,'')+')')());
+ return styleCache[type];
+}
+function escapeHTML(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function terrainTile(type,z,x,y){
+ const key=terrainSources[type]+'/'+z+'/'+x+'/'+y;
+ if(!tileCache.has(key)){
+  const task=fetch('https://cyberjapandata.gsi.go.jp/xyz/'+key+'.geojson')
+  .then(r=>{if(r.status===404||r.status===204)return null;if(!r.ok)throw Error('tile HTTP '+r.status);return r.json()});
+  tileCache.set(key,task);task.catch(()=>{if(tileCache.get(key)===task)tileCache.delete(key)});
+ }
+ return tileCache.get(key);
+}
+function officialFeatureStyle(type,config,feature){
+ const base=config.geojsonOptions&&config.geojsonOptions.style;
+ let st=typeof base==='function'?base(feature):base||{color:'#8b785e',fillColor:'#e7c984',weight:.5};
+ st={...st};
+ const alpha=Number(document.getElementById('alpha').value)/100;
+ // 国土地理院の公式色を保ち、面の透明度のみ利用者設定に合わせる。
+ st.fillOpacity=alpha;
+ return st;
+}
+async function update(){
+ const id=++requestId,z=Math.min(16,Math.max(14,map.getZoom()));
+ const bounds=map.getBounds(),nw=map.project(bounds.getNorthWest(),z).divideBy(256).floor(),se=map.project(bounds.getSouthEast(),z).divideBy(256).floor();
+ const tiles=[];
+ for(let x=Math.max(0,nw.x);x<=se.x;x++)for(let y=Math.max(0,nw.y);y<=se.y;y++)tiles.push([z,x,y]);
+ if(tiles.length>100){document.getElementById('status').textContent='表示範囲が広いため、地図を拡大してください。';return}
+ document.getElementById('status').textContent='地形分類を読み込み中…';let errors=0;
+ for(const type of ['natural','artificial']){
+  if(!document.getElementById(type).checked)continue;
+  try{
+   const cfg=await officialStyle(type);
+   const results=await Promise.allSettled(tiles.map(([zz,x,y])=>terrainTile(type,zz,x,y)));
+   if(id!==requestId)return;
+   const next=L.layerGroup();
+   results.forEach(r=>{
+    if(r.status==='rejected'){errors++;return}
+    if(!r.value||!Array.isArray(r.value.features))return;
+    next.addLayer(L.geoJSON(r.value,{pane:'terrainOfficial',style:f=>officialFeatureStyle(type,cfg,f),onEachFeature:(f,l)=>l.bindPopup(Object.entries(f.properties||{}).map(([k,v])=>'<b>'+escapeHTML(k)+'</b>: '+escapeHTML(v)).join('<br>'))}));
+   });
+   // 通信エラー時は既存表示を残す。
+   if(!errors||!layers[type].getLayers().length){layers[type].clearLayers();next.eachLayer(l=>layers[type].addLayer(l))}
+  }catch(e){errors++;console.warn('地形分類取得失敗',type,e)}
+ }
+ if(id===requestId){document.getElementById('status').textContent=errors?'地形分類の一部取得に失敗しました。通信状態をご確認ください。':'読み込み完了（国土地理院公式配色）。';routeLayer.bringToFront()}
+}
+function schedule(){clearTimeout(timer);timer=setTimeout(update,300)}
+map.on('moveend zoomend',schedule);
+for(const t of ['natural','artificial'])document.getElementById(t).addEventListener('change',()=>{if(document.getElementById(t).checked)layers[t].addTo(map);else map.removeLayer(layers[t]);schedule()});
+document.getElementById('route').addEventListener('change',e=>e.target.checked?routeLayer.addTo(map):map.removeLayer(routeLayer));
+document.getElementById('alpha').addEventListener('input',e=>{document.getElementById('alphaLabel').textContent=e.target.value+'%';schedule()});
+schedule();
+let watchId=null,gpsMarker=null,gpsAccuracy=null;
+const gpsButton=document.getElementById('gpsButton'),gpsStatus=document.getElementById('gpsStatus');
+function gpsMessage(message){gpsStatus.textContent=message;gpsStatus.style.display=message?'block':'none'}
+function stopGps(){if(watchId!==null)navigator.geolocation.clearWatch(watchId);watchId=null;gpsButton.classList.remove('active');gpsButton.textContent='◎ 現在地を表示・追尾';gpsMessage('追尾を停止しました。')}
+gpsButton.addEventListener('click',()=>{
+ if(watchId!==null){stopGps();return}
+ if(!navigator.geolocation){gpsMessage('この端末では位置情報を利用できません。');return}
+ gpsMessage('現在地を取得しています。位置情報の利用を許可してください。');
+ gpsButton.classList.add('active');gpsButton.textContent='■ 追尾を停止';
+ watchId=navigator.geolocation.watchPosition(pos=>{
+  const latlng=[pos.coords.latitude,pos.coords.longitude],accuracy=pos.coords.accuracy;
+  if(!gpsMarker){gpsMarker=L.marker(latlng,{icon:L.divIcon({className:'',html:'<div class="gps-pin"></div>',iconSize:[20,20],iconAnchor:[10,10]}),zIndexOffset:2000}).addTo(map).bindPopup('現在地（GPS）')}
+  else gpsMarker.setLatLng(latlng);
+  if(!gpsAccuracy)gpsAccuracy=L.circle(latlng,{radius:accuracy,color:'#e53935',fillColor:'#e53935',weight:1,fillOpacity:.07,interactive:false}).addTo(map);
+  else gpsAccuracy.setLatLng(latlng).setRadius(accuracy);
+  map.setView(latlng,Math.max(map.getZoom(),16),{animate:true});
+  gpsMessage('現在地を追尾中（推定誤差 約'+Math.round(accuracy)+'m）');
+ },err=>{stopGps();gpsMessage(err.code===1?'位置情報が許可されていません。ブラウザの設定をご確認ください。':err.code===3?'位置情報の取得がタイムアウトしました。':'位置情報を取得できません。HTTPSで公開したページからお試しください。')},{enableHighAccuracy:true,maximumAge:3000,timeout:15000});
+});
+</script></body></html>
